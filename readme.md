@@ -6,7 +6,7 @@ Remote Asset Synchronisation Task
 An easy to use task that downloads all the publicly accessable resources in assets/*
 
 ![Comparing the two file lists](images/download1.png)
-![Downloading in progress](images/download1.png)
+![Downloading in progress](images/download2.png)
 
 
 ### Installation 
