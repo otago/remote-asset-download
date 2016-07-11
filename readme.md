@@ -3,22 +3,17 @@ Remote Asset Synchronisation Task
 
 ### Downloads files from a remote server. 
 
-It works by listing the files, and comparing it to the local instance. If there
- are any local missing files it will download them from the remote server. Note
- because of this, _if a file has been updated remotely it will be ignored_. Also
- it uses PHP to create the file tree list, so files that are untracked by
- SilverStripe are downloaded. This also means that files that don't have public
- permission to be downloaded (e.g. .htaccess) will result in a non-terminating
- warning.
+An easy to use task that downloads all the publicly accessable resources in assets/*
 
+![Comparing the two file lists](images/download1.png)
+![Downloading in progress](images/download1.png)
 
 
 ### Installation 
 
- - Copy \fileassetssync to your folder
- - flush /dev/tasks
- - run the task when it appears
- - create you own yml **mysite/_config/remoteassetssync.yml**:
+ - **composer install otago/remote-asset-download**
+ - create your own yml **mysite/_config/remoteassetssync.yml** (see below)
+ - make sure that the yml and the module are both on the target and local machine
 
 ```
 ---
@@ -33,6 +28,9 @@ RemoteAssetTask:
     - /_generated_pdfs
 ```
 
+Your passprase should be unique, and hard to guess, and URI friendly. This will prevent the public
+from retrieving a list of your assets.
+
 
 ### How it works
 
@@ -42,9 +40,7 @@ to your server which will compare its file list against the target computer.
 Your browser will then one by one send a request to download each file to your local server.
 
 
-
 ### Notes
 
  - The task will download *new* files
- - The data flys over the wire, a secret key is set in the yml file
-   but you want it to be done securely use a HTTPS url. 
+ - pick a robust secret key in the yml file and **use HTTPS** 
