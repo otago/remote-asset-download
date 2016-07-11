@@ -1,7 +1,7 @@
 Remote Asset Synchronisation Task
 =================================
 
-### Downloads files from a remote server. 
+### Downloads files from a remote server.
 
 An easy to use task that downloads all the publicly accessable resources in assets/*
 
@@ -9,7 +9,7 @@ An easy to use task that downloads all the publicly accessable resources in asse
 ![Downloading in progress](images/download2.png)
 
 
-### Installation 
+### Installation
 
  - **composer install otago/remote-asset-download**
  - create your own yml **mysite/_config/remoteassetssync.yml** (see below)
@@ -28,13 +28,13 @@ RemoteAssetTask:
     - /_generated_pdfs
 ```
 
-Your passprase should be unique, and hard to guess, and URI friendly. This will prevent the public
+Your passphrase should be unique, and hard to guess, and URI friendly. This will prevent the public
 from retrieving a list of your assets.
 
 
 ### How it works
 
-By running **/dev/tasks/RemoteAssetTask** your browser sends an ajax request 
+By running **/dev/tasks/RemoteAssetTask** your browser sends an ajax request
 to your server which will compare its file list against the target computer.
 
 Your browser will then one by one send a request to download each file to your local server.
@@ -43,4 +43,4 @@ Your browser will then one by one send a request to download each file to your l
 ### Notes
 
  - The task will download *new* files
- - pick a robust secret key in the yml file and **use HTTPS** 
+ - pick a robust secret key in the yml file and **use HTTPS**
