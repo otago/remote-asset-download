@@ -1,0 +1,9 @@
+---
+Name: remoteassetsync
+After: 'framework/routes#coreroutes'
+---
+Director:
+    rules:
+        'remoteassetlist' : 'RemoteAssetListController'
+        'remoteassetdiff' : 'RemoteAssetDiffController'
+        'remoteassetdownload' : 'RemoteASsetDownloadController'
