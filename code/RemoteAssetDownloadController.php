@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Returns a list of the files in JSON format. 
+ * Downloads a single file
  * 
  * @see RemoteAssetDownloadTask.php
  */
@@ -13,7 +13,7 @@ class RemoteAssetDownloadController extends Page_Controller {
 	private static $allowed_actions = array('view');
 
 	/**
-	 * Outputs the list of files, and the ID and edit dates of the Data Objects
+	 * Downloads a single file
 	 * @param SS_HTTPRequest $request checks the access code to make sure no
 	 * public spoofing
 	 */
