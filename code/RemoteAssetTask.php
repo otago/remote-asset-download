@@ -32,11 +32,28 @@ class RemoteAssetTask extends BuildTask {
 		$myurl = Director::absoluteURL('/remoteassetdiff') . '/' . urlencode($this->config()->key);
 		$downloadurl = Director::absoluteURL('/remoteassetdownload') . '/' . urlencode($this->config()->key) . '?m=' . time();
 
-		// todo: if CLI, download without javascript
+		// download without javascript
 		if (Director::is_cli()) {
 			ini_set('memory_limit', '1024M');
 			set_time_limit(0);
 
+			echo "Creating list of files to download" . PHP_EOL;
+
+			$listoffiles = RemoteAssetTask::DownloadFile($myurl);
+			$fullist = json_decode($listoffiles);
+			if (!is_array($fullist->download)) {
+				throw new Exception('Failure to download list of files');
+			}
+			foreach ($fullist->download as $file) {
+				echo "Downloading $file ... ";
+				try {
+					RemoteAssetTask::DownloadFile($downloadurl . '&download=' . $file);
+					echo "Success" . PHP_EOL;
+				} catch (Exception $e) {
+					echo "Failure" . PHP_EOL;
+				}
+			}
+			echo "Done" . PHP_EOL;
 			return;
 		}
 
