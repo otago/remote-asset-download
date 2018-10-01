@@ -44,7 +44,7 @@ of ~100k files to download.
 
 ### How it works
 
-By running **/dev/tasks/RemoteAssetTask** your browser sends an ajax request
+By running **/dev/tasks/OP-RemoteAssetTask** your browser sends an ajax request
 to your server which will compare its file list against the target computer.
 
 Your browser will then one by one send a request to download each file to your local server.
