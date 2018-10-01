@@ -1,23 +1,25 @@
 <?php
 
+namespace OP;
+
+use SilverStripe\Control\Controller;
+use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Core\Config\Config;
+use Exception;
+
 /**
  * Returns a list of the files in JSON format. 
  * 
  * @see RemoteAssetDownloadTask.php
  */
-class RemoteAssetListController extends Page_Controller {
-
-	private static $url_handlers = array(
-		'$AccessKey!' => 'view',
-	);
-	private static $allowed_actions = array('view');
+class RemoteAssetListController extends Controller {
 
 	/**
 	 * Outputs the list of files, and the ID and edit dates of the Data Objects
 	 * @param SS_HTTPRequest $request checks the access code to make sure no
 	 * public spoofing
 	 */
-	public function view(SS_HTTPRequest $request) {
+	public function index(HTTPRequest $request) {
 		// close the session to allow concurrent requests
 		session_write_close();
 
@@ -27,19 +29,22 @@ class RemoteAssetListController extends Page_Controller {
 
 		$params = $request->allParams();
 
-		// note the url format for the key code is domain.com/remoteassetsync/<keyhere>
-		if (!isset($params['AccessKey'])) {
-			throw new Exception('Access key not set. See Readme.md for instructions on how to set this in your yml file.');
-		}
+		$config = Config::forClass(RemoteAssetTask::class);
 
-		$config = Config::inst()->forClass('RemoteAssetTask');
+		// note the url format for the key code is domain.com/remoteassetsync/<keyhere>
+		if (!$config->key) {
+			throw new Exception('Access key not set. See Readme.md for instructions on how to set this in your yml file');
+		}
+		if (!isset($params['AccessKey'])) {
+			throw new Exception('Access key not set in URL');
+		}
 
 		if ($config->key != $params['AccessKey']) {
 			throw new Exception('Key missmatch');
 		}
 
-		$list = array();
-		RemoteAssetListController::recurseDir('../assets', $list);
+		$list = [];
+		RemoteAssetListController::recurseDir(ASSETS_PATH, $list);
 		echo json_encode(array_values($list));
 	}
 
@@ -53,7 +58,7 @@ class RemoteAssetListController extends Page_Controller {
 			while (($file = readdir($dh)) !== false) {
 				if ($file != '.' && $file != '..') {
 					if (!is_dir($dir . '/' . $file)) {
-						$array [] = $dir .'/'. $file;
+						$array [] = $dir . '/' . $file;
 					} else {
 						RemoteAssetListController::recurseDir($dir . '/' . $file, $array);
 					}

@@ -19,7 +19,7 @@ An easy to use task that downloads all the publicly accessable resources in asse
 ---
 Name: RemoteAssetTask
 ---
-RemoteAssetTask:
+OP\RemoteAssetTask:
   target: https://remotedownloaddomain.com/
   key: url_friendly_passprase
   excludedfolders:
@@ -30,6 +30,16 @@ RemoteAssetTask:
 
 Your passphrase should be unique, and hard to guess, and URI friendly. This will prevent the public
 from retrieving a list of your assets.
+
+### How to run it
+
+Open up **/dev/tasks/OP-RemoteAssetTask** in your browser. You can also run it 
+from the command line with **vendor/silverstripe/framework/sake dev/tasks/OP-RemoteAssetTask**
+
+Running it from the command line is a great idea if you have a metric shit tonne 
+of files. The call stack will be exceeded in the browser if you have an access 
+of ~100k files to download.
+
 
 
 ### How it works

@@ -1,9 +1,11 @@
 ---
 Name: remoteassetsync
-After: 'framework/routes#coreroutes'
+After:
+  - '#rootroutes'
+  - '#coreroutes'
 ---
-Director:
+SilverStripe\Control\Director:
     rules:
-        'remoteassetlist' : 'RemoteAssetListController'
-        'remoteassetdiff' : 'RemoteAssetDiffController'
-        'remoteassetdownload' : 'RemoteASsetDownloadController'
+        'remoteassetlist/$AccessKey!' : 'OP\RemoteAssetListController'
+        'remoteassetdiff/$AccessKey!' : 'OP\RemoteAssetDiffController'
+        'remoteassetdownload/$AccessKey!' : 'OP\RemoteASsetDownloadController'

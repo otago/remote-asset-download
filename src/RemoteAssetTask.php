@@ -1,5 +1,12 @@
 <?php
 
+namespace OP;
+
+use SilverStripe\Dev\BuildTask;
+use Exception;
+use SilverStripe\Control\Director;
+use SilverStripe\View\ArrayData;
+
 /**
  * Downloads files from a remote server.
  * 
@@ -50,7 +57,7 @@ class RemoteAssetTask extends BuildTask {
 					RemoteAssetTask::DownloadFile($downloadurl . '&download=' . $file);
 					echo "Success" . PHP_EOL;
 				} catch (Exception $e) {
-					echo "Failure" . PHP_EOL;
+					echo "Failure (" . $e->getMessage() . ")" . PHP_EOL;
 				}
 			}
 			echo "Done" . PHP_EOL;

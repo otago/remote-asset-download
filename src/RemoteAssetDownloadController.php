@@ -1,23 +1,26 @@
 <?php
 
+namespace OP;
+
+use SilverStripe\Control\Controller;
+use SilverStripe\Control\HTTPResponse_Exception;
+use SilverStripe\Control\HTTPRequest;
+use Exception;
+use SilverStripe\Core\Config\Config;
+
 /**
  * Downloads a single file
  * 
  * @see RemoteAssetDownloadTask.php
  */
-class RemoteAssetDownloadController extends Page_Controller {
-
-	private static $url_handlers = array(
-		'$AccessKey!' => 'view',
-	);
-	private static $allowed_actions = array('view');
+class RemoteAssetDownloadController extends Controller {
 
 	/**
 	 * Downloads a single file
 	 * @param SS_HTTPRequest $request checks the access code to make sure no
 	 * public spoofing
 	 */
-	public function view(SS_HTTPRequest $request) {
+	public function index(HTTPRequest $request) {
 		// close the session to allow concurrent requests
 		session_write_close();
 
@@ -26,13 +29,16 @@ class RemoteAssetDownloadController extends Page_Controller {
 		set_time_limit(0);
 
 		$params = $request->allParams();
+		$config = Config::forClass(RemoteAssetTask::class);
 
 		// note the url format for the key code is domain.com/remoteassetsync/<keyhere>
+		if (!$config->key) {
+			throw new Exception('Access key not set. See Readme.md for instructions on how to set this in your yml file');
+		}
 		if (!isset($params['AccessKey'])) {
-			throw new Exception('Access key not set. See Readme.md for instructions on how to set this in your yml file.');
+			throw new Exception('Access key not set in URL');
 		}
 
-		$config = Config::inst()->forClass('RemoteAssetTask');
 
 		if ($config->key != $params['AccessKey']) {
 			throw new Exception('Key missmatch');
@@ -51,11 +57,11 @@ class RemoteAssetDownloadController extends Page_Controller {
 		try {
 			$filecontents = RemoteAssetTask::DownloadFile($myurl);
 		} catch (Exception $e) {
-			throw new SS_HTTPResponse_Exception($e->getMessage(), 400);
+			throw new HTTPResponse_Exception($e->getMessage(), 400);
 		}
 
 		if (!$filecontents) {
-			throw new SS_HTTPResponse_Exception('Failed to download.', 400);
+			throw new HTTPResponse_Exception('Failed to download.', 400);
 		}
 
 		// create new folder if none exists
@@ -68,9 +74,9 @@ class RemoteAssetDownloadController extends Page_Controller {
 		if (file_exists($request->getVar('download'))) {
 			unlink($request->getVar('download'));
 		}
-		
+
 		if (!file_put_contents($request->getVar('download'), $filecontents)) {
-			throw new SS_HTTPResponse_Exception('Failed to write contents.', 400);
+			throw new HTTPResponse_Exception('Failed to write contents.', 400);
 		}
 
 		return json_encode('Success!');
