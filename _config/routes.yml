@@ -1,11 +1,11 @@
 ---
-Name: remoteassetsync
+Name: remoteassetdownload
 After:
   - '#rootroutes'
   - '#coreroutes'
 ---
 SilverStripe\Control\Director:
     rules:
-        'remoteassetlist/$AccessKey!' : 'OP\RemoteAssetListController'
-        'remoteassetdiff/$AccessKey!' : 'OP\RemoteAssetDiffController'
-        'remoteassetdownload/$AccessKey!' : 'OP\RemoteASsetDownloadController'
+        'remoteassetreadfiles/$Page' : 'OP\RemoteAssetReadFilesController'
+        'remoteassetdownloadfiles' : 'OP\RemoteAssetDownloadFilesController'
+

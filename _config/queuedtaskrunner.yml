@@ -1,0 +1,3 @@
+Symbiote\QueuedJobs\Controllers\QueuedTaskRunner:
+  task_blacklist:
+    - OP\RemoteAssetTask

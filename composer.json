@@ -1,9 +1,9 @@
 {
 	"name": "otago/remote-asset-download",
-	"description": "Remote Asset Synchronisation Task",
+	"description": "Remote Asset Download Task",
 	"type": "silverstripe-vendormodule",
 	"homepage": "https://github.com/otago/remote-asset-download",
-	"keywords": ["silverstripe", "Remote sync", "task"],
+	"keywords": ["silverstripe", "Remote download", "task"],
 	"license": "BSD-3-Clause",
 	"require": {
 		"silverstripe/vendor-plugin": "^1.0",

@@ -1,9 +1,12 @@
 Remote Asset Synchronisation Task
 =================================
 
-### Downloads files from a remote server.
+### Downloads files from a remote server running SilverStripe
 
-An easy to use task that downloads all the publicly accessable resources in assets/*
+A task that downloads accessable files in assets/* from a target server
+
+Usefull when you want to update assets onto a development 
+environment, without having to do a full file snapshot.
 
 ![Comparing the two file lists](images/download1.png)
 ![Downloading in progress](images/download2.png)
@@ -11,46 +14,44 @@ An easy to use task that downloads all the publicly accessable resources in asse
 
 ### Installation
 
- - **composer install otago/remote-asset-download**
- - create your own yml **mysite/_config/remoteassetssync.yml** (see below)
- - make sure that the yml and the module are both on the target and local machine
+ - **composer install --dev otago/remote-asset-download**
+ - create your own yml **app/_config/remoteassetssync.yml** (see below)
+ - Create a user that can read & write assets you want to sync on the target machine. 
+   This user is also used to run the task in CLI mode on the local machine.
 
 ```
 ---
 Name: RemoteAssetTask
 ---
-OP\RemoteAssetTask:
-  target: https://remotedownloaddomain.com/
-  key: url_friendly_passprase
-  excludedfolders:
-    - /static-cache
-    - /largefiles
-    - /_generated_pdfs
+OP\RemoteAssetReadFilesController:
+  target: https://target.server.org
+  user: member@organisation.org
+  password: <mypassword>
 ```
 
-Your passphrase should be unique, and hard to guess, and URI friendly. This will prevent the public
-from retrieving a list of your assets.
+The user must exist in SilverStripe, and have access to assets. you can restrict the user 
+to specific files and folders in the SilverStripe CMS.
 
 ### How to run it
 
-Open up **/dev/tasks/OP-RemoteAssetTask** in your browser. You can also run it 
-from the command line with **vendor/silverstripe/framework/sake dev/tasks/OP-RemoteAssetTask**
+Open up **/dev/tasks/OP-RemoteAssetTask** in your browser on the local machine. 
 
-Running it from the command line is a great idea if you have a metric shit tonne 
-of files. The call stack will be exceeded in the browser if you have an access 
-of ~100k files to download.
+You can also run it from the command line with 
 
+**vendor/silverstripe/framework/sake dev/tasks/OP-RemoteAssetTask**
 
 
 ### How it works
 
-By running **/dev/tasks/OP-RemoteAssetTask** your browser sends an ajax request
-to your server which will compare its file list against the target computer.
+GraphQL black magic
 
-Your browser will then one by one send a request to download each file to your local server.
+When you load the task via HTTP on the local machine, an ajax poll will ask your 
+local machine to send a graphql request to the target server. This will return a 
+list of files in assets. This result will then be passed back to your local machine,
+which will then bulk download these files from the target server.
 
 
 ### Notes
 
- - The task will download *new* files
- - pick a robust secret key in the yml file and **use HTTPS**
+ - The task will stop when it starts running into files that have the same name & id.
+ - if a file has a different file and the same id, it will be overwritten
