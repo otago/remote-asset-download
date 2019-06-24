@@ -116,16 +116,17 @@ class RemoteAssetTask extends BuildTask
     {
         $this->log("Starting RemoteAssetTask");
 
-        $currentpage = 0;
+        $daysago = 0;
+        $offset = 0;
         $bailout = false;
 
         do {
-            $this->log("Pulling list of files on page $currentpage");
+            $this->log("Pulling list of files from $daysago days ago on page $offset");
 
             // request 10 latest files
             $result = singleton(RemoteAssetReadFilesController::class)->DownloadFile(
                 Controller::join_links(singleton(RemoteAssetReadFilesController::class)->config()->target, 'admin/graphql'),
-                json_encode(singleton(RemoteAssetReadFilesController::class)->buildgraphql($currentpage))
+                json_encode(singleton(RemoteAssetReadFilesController::class)->buildgraphql($daysago, $offset))
             );
 
             $jsonpayload = json_decode($result, true);
@@ -146,7 +147,8 @@ class RemoteAssetTask extends BuildTask
                 $this->log("Requesting download of " . count($remotefilesarray) . ' files');
 
                 foreach ($remotefilesarray as $fileresult) {
-                    if (in_array('finishquery', $fileresult) && $fileresult['finishquery']) {
+                    if (isset($fileresult['finishquery']) && $fileresult['finishquery']) {
+                        $this->log("Time to finish querying. finished!");
                         //    $bailout = true;
                     }
                     if ($fileresult['code'] === 200) {
@@ -160,8 +162,13 @@ class RemoteAssetTask extends BuildTask
                 $bailout = true;
             }
 
-            // do 10 pages at a time
-            $currentpage += 10;
+            if ($jsonpayload['data']['readFiles']['pageInfo']['hasNextPage'] === false) {
+                $daysago++;
+                $offset = 0;
+            }
+            if ($jsonpayload['data']['readFiles']['pageInfo']['hasNextPage'] === true) {
+                $offset += 10;
+            }
         } while (!$bailout);
     }
 

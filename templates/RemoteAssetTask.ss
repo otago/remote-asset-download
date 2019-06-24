@@ -44,14 +44,14 @@
 		(function ($) {
 
             // requests the server to download a list of files given a resulting graphql response.
-            var RemoteAssetReadFiles = function(startpage) {
+            var RemoteAssetReadFiles = function(daysago, offset) {
                 let RemoteAssetReadFilesControllerURL = $('#RemoteAssetReadFilesControllerURL').html();
                 let RemoteAssetDownloadFilesControllerURL = $('#RemoteAssetDownloadFilesControllerURL').html();
                 let downloadarray = new Object();
 
-                $('#Info').show().html('Retrieving remote list of newest files on page '+startpage+'...');
+                $('#Info').show().html('Retrieving remote list of files from '+daysago+' days ago. on page ' +offset + '...');
 
-                var jqxhr = $.ajax( RemoteAssetReadFilesControllerURL+'/'+startpage, {
+                var jqxhr = $.ajax( RemoteAssetReadFilesControllerURL+'/'+daysago+'/'+offset, {
                     dataType :"json"
                 })
                 .done(function(data) {
@@ -76,6 +76,15 @@
                         $('#Info').show().html('Failure to fetch lastest files from target server');
                         return;
                     }
+
+                    // if you've reached the end of the day, progress to one day before
+                    offset += 10;
+                    try {
+                        if(data.data.readFiles.pageInfo.hasNextPage === false) {
+                            daysago++;
+                            offset = 0;
+                        }
+                    } catch(e) { }
                     
                     $.ajax({
                         type: "POST",
@@ -106,7 +115,7 @@
                                // $('#Info').show().html("Finished! you've reached new files that allready exist");
                                // return;
                             }
-                            RemoteAssetReadFiles(startpage+10);
+                            RemoteAssetReadFiles(daysago, offset);
                         },
                         error: function (result) {
 				            $('#Info').show().html('Failure to store files locally. End.');
@@ -119,70 +128,6 @@
                 .always(function() {
                     //$('#Info').show().html('Completed request');
                 });
-                
-
-
-				/*$.getJSON(RemoteAssetReadFilesControllerURL+'/'+startpage, function (data) {
-				    $('#Info').show().html('Received batch of files.');
-                    
-                    if(data.info) {
-                        $('#Info').show().html(data.info);
-                        return;
-                    }
-
-                    // try in case the graphql is flakey...
-                    try {
-				        $('#Info').show().html('Requesting server batch download '+data.data.readFiles.edges.length+' files.');
-                    } catch(e) { }
-
-
-                    try {
-                        data.data.readFiles.edges.forEach(function (item) {
-                            downloadarray[item.node['id']] = item.node;
-                        });
-                    } catch(e) {
-                        $('#Info').show().html('Failure');
-                        return;
-                    }
-                    
-                    $.ajax({
-                        type: "POST",
-                        url: RemoteAssetDownloadFilesControllerURL,
-                        data: downloadarray,
-                        success: function(result) {
-				            $('#Info').show().html('done burger :D');
-                            var finished = false;
-                            try {
-                                result.forEach(function (item) {
-                                    console.log(item);
-                                    if(item.code === 200) {
-                                        $('#Success').show().append('<p>Success. '+item.success+'</p>');
-                                    } else {
-                                        $('#Error').show().append('<p>Failure. '+item.error+'</p>');
-                                    }
-
-                                    // you're done! you've started to match existing files
-                                    if(item.finishquery) {
-                                        finished = true;
-                                    }
-                                });
-                            } catch(e) {
-                                $('#Info').show().html('Failure to resolve bulk download request');
-                                return;
-                            }
-                            console.log(finished);
-                            if(finished) {
-                               // $('#Info').show().html("Finished! you've reached new files that allready exist");
-                               // return;
-                            }
-                            RemoteAssetReadFiles(startpage+1);
-                        }
-                    });
-                })
-                .error(function(e) {
-                console.log(e);
-                    $('#Info').show().html(e);
-                });*/
             }
 
 			$(document).ready(function () {
@@ -190,7 +135,7 @@
 				$('#Success').hide();
 
                 // recursively ask for files to download
-                RemoteAssetReadFiles(0);
+                RemoteAssetReadFiles(0, 0);
 			});
 		})(jQuery);
 	</script>

@@ -24,14 +24,14 @@ class RemoteAssetReadFilesController extends Controller
      */
     public function index(HTTPRequest $request)
     {
-        $offset = $request->param('Page');
-
+        $daysago = $request->param('daysago');
+        $offset = $request->param('offset');
+        
         // request 10 latest files
         $result = $this->DownloadFile(
             Controller::join_links($this->config()->target, 'admin/graphql'),
-            json_encode($this->buildgraphql((int)$offset))
+            json_encode($this->buildgraphql((int)$daysago, (int)$offset))
         );
-
         // build up the JSON response
         $response = HTTPResponse::create();
         $response->addHeader('Content-Type', 'application/json');
@@ -45,17 +45,21 @@ class RemoteAssetReadFilesController extends Controller
      *
      * @returns array
      */
-    public function buildgraphql($offset)
+    public function buildgraphql($daysago, $offset)
     {
+        $lastEditedTo = date("Y-m-d", strtotime("-$daysago day"));
+        if ($daysago === 0) {
+            $lastEditedTo = date("Y-m-d", strtotime("today"));
+        }
+        $daysago++;
+        $lastEditedFrom = date("Y-m-d", strtotime("-$daysago day"));
 
         $query = <<<GRAPHQL
-query readFiles(\$sortBy:ReadFilesSortInputType, \$offset:Int) {
+query readFiles(\$sortBy:ReadFilesSortInputType, \$offset:Int, \$filter: FileFilterInput) {
     readFiles(
         limit:10,
         offset: \$offset
-        filter:{
-        name:"File"
-        },
+        filter: \$filter,
         sortBy: [\$sortBy]
     ) {
         edges{
@@ -67,7 +71,6 @@ query readFiles(\$sortBy:ReadFilesSortInputType, \$offset:Int) {
                 created
                 published
                 parentId
-                
                 }
             }
         }
@@ -79,13 +82,17 @@ query readFiles(\$sortBy:ReadFilesSortInputType, \$offset:Int) {
 }
 GRAPHQL;
         return [
-            'query' => "$query",
+            "query" => "$query",
             "variables" => [
                 "sortBy" => [
                     "field" => "ID",
                     "direction" => "DESC"
                 ],
-                "offset" => $offset
+                "offset" => $offset,
+                "filter" => [
+                    "lastEditedFrom" => $lastEditedFrom,
+                    "lastEditedTo" => $lastEditedTo
+                ]
             ]
         ];
     }

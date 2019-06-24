@@ -6,6 +6,6 @@ After:
 ---
 SilverStripe\Control\Director:
     rules:
-        'remoteassetreadfiles/$Page' : 'OP\RemoteAssetReadFilesController'
+        'remoteassetreadfiles/$daysago/$offset' : 'OP\RemoteAssetReadFilesController'
         'remoteassetdownloadfiles' : 'OP\RemoteAssetDownloadFilesController'
 
