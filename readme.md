@@ -14,7 +14,7 @@ environment, without having to do a full file snapshot.
 
 ### Installation
 
- - **composer install --dev otago/remote-asset-download**
+ - **composer require --dev otago/remote-asset-download**
  - create your own yml **app/_config/remoteassetssync.yml** (see below)
  - Create a user that can read & write assets you want to sync on the target machine. 
    This user is also used to run the task in CLI mode on the local machine.
