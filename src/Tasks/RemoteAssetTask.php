@@ -117,17 +117,19 @@ class RemoteAssetTask extends BuildTask
     {
         $this->log("Starting RemoteAssetTask");
 
-        $daysago = 0;
         $offset = 0;
         $bailout = false;
 
         do {
-            $this->log("Pulling list of files from $daysago days ago on page $offset");
+            $this->log("Pulling list of files on page $offset");
 
             // request 10 latest files
             $result = singleton(RemoteAssetReadFilesController::class)->DownloadFile(
                 Controller::join_links(singleton(RemoteAssetReadFilesController::class)->config()->target, 'admin/graphql'),
-                json_encode(singleton(RemoteAssetReadFilesController::class)->buildgraphql($daysago, $offset))
+                json_encode(singleton(RemoteAssetReadFilesController::class)->buildgraphql(
+                    $offset,
+                    singleton(RemoteAssetReadFilesController::class)->config()->ignore
+                ))
             );
 
             $jsonpayload = json_decode($result, true);
@@ -139,7 +141,7 @@ class RemoteAssetTask extends BuildTask
             $remotefilesarray = array();
 
             try {
-                foreach ($jsonpayload['data']['readFiles']['edges'] as $filenode) {
+                foreach ($jsonpayload['data']['readPaginatedFiles']['edges'] as $filenode) {
                     $remotefilesarray[] = $filenode['node'];
                 }
 
@@ -150,7 +152,7 @@ class RemoteAssetTask extends BuildTask
                 foreach ($remotefilesarray as $fileresult) {
                     if (isset($fileresult['finishquery']) && $fileresult['finishquery']) {
                         $this->log("Time to finish querying. finished!");
-                        //    $bailout = true;
+                        $bailout = true;
                     }
                     if ($fileresult['code'] === 200) {
                         $this->log('[' . $fileresult['code'] . '] ' . $fileresult['success']);
@@ -163,11 +165,10 @@ class RemoteAssetTask extends BuildTask
                 $bailout = true;
             }
 
-            if ($jsonpayload['data']['readFiles']['pageInfo']['hasNextPage'] === false) {
-                $daysago++;
+            if ($jsonpayload['data']['readPaginatedFiles']['pageInfo']['hasNextPage'] === false) {
                 $offset = 0;
             }
-            if ($jsonpayload['data']['readFiles']['pageInfo']['hasNextPage'] === true) {
+            if ($jsonpayload['data']['readPaginatedFiles']['pageInfo']['hasNextPage'] === true) {
                 $offset += 10;
             }
         } while (!$bailout);
