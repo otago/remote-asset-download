@@ -24,13 +24,13 @@ class RemoteAssetReadFilesController extends Controller
      */
     public function index(HTTPRequest $request)
     {
-        $daysago = $request->param('daysago');
         $offset = $request->param('offset');
-        
+        $ignore = $request->getVar('ignore');
+        // you can run php -S 127.0.0.1:8000 for an additional server to test locally
         // request 10 latest files
         $result = $this->DownloadFile(
             Controller::join_links($this->config()->target, 'admin/graphql'),
-            json_encode($this->buildgraphql((int)$daysago, (int)$offset))
+            json_encode($this->buildgraphql((int)$offset, $ignore))
         );
         // build up the JSON response
         $response = HTTPResponse::create();
@@ -45,20 +45,14 @@ class RemoteAssetReadFilesController extends Controller
      *
      * @returns array
      */
-    public function buildgraphql($daysago, $offset)
+    public function buildgraphql($offset, $ignore)
     {
-        $lastEditedTo = date("Y-m-d", strtotime("-$daysago day"));
-        if ($daysago === 0) {
-            $lastEditedTo = date("Y-m-d", strtotime("today"));
-        }
-        $daysago++;
-        $lastEditedFrom = date("Y-m-d", strtotime("-$daysago day"));
 
         $query = <<<GRAPHQL
-query readFiles(\$sortBy:ReadFilesSortInputType, \$offset:Int, \$filter: FileFilterInput) {
-    readFiles(
+query readPaginatedFiles(\$sortBy:ReadPaginatedFilesSortInputType, \$offset:Int, \$filter: PaginatedFileFilterInput) {
+    readPaginatedFiles(
         limit:10,
-        offset: \$offset
+        offset: \$offset,
         filter: \$filter,
         sortBy: [\$sortBy]
     ) {
@@ -89,10 +83,7 @@ GRAPHQL;
                     "direction" => "DESC"
                 ],
                 "offset" => $offset,
-                "filter" => [
-                    "lastEditedFrom" => $lastEditedFrom,
-                    "lastEditedTo" => $lastEditedTo
-                ]
+                "filter" => ["filenameExcludeStarts" => $ignore]
             ]
         ];
     }

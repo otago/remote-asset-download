@@ -52,8 +52,8 @@ class RemoteAssetTask extends BuildTask
         }
 
         // build communication urls
-        $RemoteAssetReadFilesControllerURL = Director::absoluteURL('/remoteassetreadfiles');
-        $RemoteAssetDownloadFilesControllerURL = Director::absoluteURL('/remoteassetdownloadfiles');
+        $RemoteAssetReadFilesControllerURL = Director::absoluteURL('/RemoteAssetReadFilesController');
+        $RemoteAssetDownloadFilesControllerURL = Director::absoluteURL('/RemoteAssetDownloadFilesController');
 
 
         // download without javascript
@@ -78,7 +78,8 @@ class RemoteAssetTask extends BuildTask
                 'RemoteAssetReadFilesControllerURL' => $RemoteAssetReadFilesControllerURL,
                 'RemoteAssetDownloadFilesControllerURL' =>  $RemoteAssetDownloadFilesControllerURL,
                 'Target' => singleton(RemoteAssetReadFilesController::class)->config()->target,
-                'ToMachine' => Director::absoluteURL('/')
+                'ToMachine' => Director::absoluteURL('/'),
+                'IgnoreList' => singleton(RemoteAssetReadFilesController::class)->config()->ignore
             ]
         )->renderWith('RemoteAssetTask');
     }

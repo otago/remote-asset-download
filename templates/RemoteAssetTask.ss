@@ -33,26 +33,32 @@
 				<ul class="list-group" id="DownloadList">
 					<!-- list-group-item-success,list-group-item-info,list-group-item-warning,list-group-item-danger-->
 				</ul>
-				<ul class="list-group" id="IgnoreList">
-					<!-- list-group-item-success,list-group-item-info,list-group-item-warning,list-group-item-danger-->
-				</ul>
+				<ul class="list-group" id="IgnoreList" style="display:none">$IgnoreList</ul>
 			</div>
 		</div>
 
 	</body>
 	<script>
 		(function ($) {
-
             // requests the server to download a list of files given a resulting graphql response.
-            var RemoteAssetReadFiles = function(daysago, offset) {
+            var RemoteAssetReadFiles = function(offset, totalcount) {
                 let RemoteAssetReadFilesControllerURL = $('#RemoteAssetReadFilesControllerURL').html();
                 let RemoteAssetDownloadFilesControllerURL = $('#RemoteAssetDownloadFilesControllerURL').html();
+                let IgnoreList = $('#IgnoreList').html();
                 let downloadarray = new Object();
 
-                $('#Info').show().html('Retrieving remote list of files from '+daysago+' days ago. on page ' +offset + '...');
+                $('#Info').show().html('Retrieving remote list of files on page ' +offset + '...');
 
-                var jqxhr = $.ajax( RemoteAssetReadFilesControllerURL+'/'+daysago+'/'+offset, {
-                    dataType :"json"
+                if(totalcount) {
+                    var percentcomplete = (offset / totalcount).toFixed(2);
+                    $('#Info').show().html('Retrieving remote list of files on page ' +offset + 
+                    ', of a total of ' + totalcount  + ' files. ' + percentcomplete + ' percent complete...');
+                }
+
+                var jqxhr = $.ajax( RemoteAssetReadFilesControllerURL+'/'+offset + '?ignore=' + IgnoreList,
+                {
+                    dataType :"json",
+                    'totalcount': totalcount
                 })
                 .done(function(data) {
                     $('#Info').show().html('Received batch of files.');
@@ -64,12 +70,18 @@
 
                     // try in case the graphql is flakey...
                     try {
-				        $('#Info').show().html('Requesting server batch download '+data.data.readFiles.edges.length+' files.');
+                        this.totalcount = data.data.readPaginatedFiles.pageInfo.totalCount;
+				        $('#Info').show().html(
+                            'Requesting server batch download of '+
+                            data.data.readPaginatedFiles.edges.length+
+                            ' files. Of a total of ' + this.totalcount  + ' files.'
+                            );
                     } catch(e) { }
 
-
+                   // console.log(data);
                     try {
-                        data.data.readFiles.edges.forEach(function (item) {
+                        data.data.readPaginatedFiles.edges.forEach(function (item) {
+                            console.log(item);
                             downloadarray[item.node['id']] = item.node;
                         });
                     } catch(e) {
@@ -80,7 +92,7 @@
                     // if you've reached the end of the day, progress to one day before
                     offset += 10;
                     try {
-                        if(data.data.readFiles.pageInfo.hasNextPage === false) {
+                        if(data.data.readPaginatedFiles.pageInfo.hasNextPage === false) {
                             daysago++;
                             offset = 0;
                         }
@@ -90,6 +102,7 @@
                         type: "POST",
                         url: RemoteAssetDownloadFilesControllerURL,
                         data: downloadarray,
+                        'totalcount': this.totalcount,
                         success: function(result) {
 				            $('#Info').show().html('done burger :D');
                             var finished = false;
@@ -112,10 +125,10 @@
                             }
                             
                             if(finished) {
-                               // $('#Info').show().html("Finished! you've reached new files that allready exist");
-                               // return;
+                                $('#Info').show().html("Finished! you've reached new files that allready exist");
+                                return;
                             }
-                            RemoteAssetReadFiles(daysago, offset);
+                            RemoteAssetReadFiles(offset, this.totalcount);
                         },
                         error: function (result) {
 				            $('#Info').show().html('Failure to store files locally. End.');

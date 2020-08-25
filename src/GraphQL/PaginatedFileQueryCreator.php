@@ -15,6 +15,11 @@ use GraphQL\Type\Definition\ResolveInfo;
 
 class PaginatedFileQueryCreator extends PaginatedQueryCreator
 {
+    /**
+     * returns an array of attributes
+     *
+     * @return array
+     */
     public function attributes()
     {
         return [
@@ -22,14 +27,32 @@ class PaginatedFileQueryCreator extends PaginatedQueryCreator
         ];
     }
 
+    /**
+     * creates the connector
+     *
+     * @return Connection
+     */
     public function createConnection()
     {
         return Connection::create('readPaginatedFiles')
+        ->setArgs(function () {
+            return [
+                'filter' => [
+                    'type' => $this->manager->getType('PaginatedFileFilterInput')
+                ]
+            ];
+        })
             ->setConnectionType($this->manager->getType('File'))
             ->setSortableFields(['ID', 'Title', 'Created', 'LastEdited'])
             ->setConnectionResolver(
                 function ($object, array $args, $context, ResolveInfo $info) {
-                    return File::get();
+                    $list = File::get();
+                    $filter = (!empty($args['filter'])) ? $args['filter'] : [];
+
+                    $filterInputType = new PaginatedFileFilterInputTypeCreator($this->manager);
+                    $list = $filterInputType->filterList($list, $filter);
+
+                    return $list;
                 }
             );
     }
