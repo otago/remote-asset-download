@@ -14,12 +14,13 @@ environment, without having to do a full file snapshot. It's usefull for large w
 
 ### Installation
 
- - **composer require --dev otago/remote-asset-download**
- - create your own yml **app/_config/remoteassetssync.yml** (see below)
+ - **composer require otago/remote-asset-download**
  - Create a user that can read & write assets you want to sync on the target machine. 
    This user is also used to run the task in CLI mode on the local machine.
+ - create your own yml **app/_config/remoteassetssync.yml**
+ - update the **app/_config/remoteassetssync.yml** with your new user's username and
+   password, like the one below
 
-Put this in app/_config/remoteassetssync.yml:
 
 ```
 ---
