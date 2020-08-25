@@ -6,7 +6,7 @@ Remote Asset Synchronisation Task
 A task that downloads accessable files in assets/* from a target server
 
 Usefull when you want to update assets onto a development 
-environment, without having to do a full file snapshot.
+environment, without having to do a full file snapshot. It's usefull for large websites.
 
 ![Comparing the two file lists](images/download1.png)
 ![Downloading in progress](images/download2.png)
@@ -19,14 +19,17 @@ environment, without having to do a full file snapshot.
  - Create a user that can read & write assets you want to sync on the target machine. 
    This user is also used to run the task in CLI mode on the local machine.
 
+Put this in app/_config/remoteassetssync.yml:
+
 ```
 ---
 Name: RemoteAssetTask
 ---
 OP\RemoteAssetReadFilesController:
-  target: https://target.server.org
-  user: member@organisation.org
-  password: <mypassword>
+  target: https://website.where.filescomefrom
+  user: myuserwithfilepermissions@website.org
+  password: mysecretpassword
+  ignore: assets/studenthub/,assets/staffhub/
 ```
 
 The user must exist in SilverStripe, and have access to assets. you can restrict the user 
@@ -43,7 +46,7 @@ You can also run it from the command line with
 
 ### How it works
 
-GraphQL black magic
+GraphQL
 
 When you load the task via HTTP on the local machine, an ajax poll will ask your 
 local machine to send a graphql request to the target server. This will return a 
