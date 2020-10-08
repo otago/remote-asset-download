@@ -1,0 +1,10 @@
+---
+Name: fileadmingraphql
+---
+SilverStripe\GraphQL\Manager:
+  schemas:
+    admin:
+      types:
+        PaginatedFileFilterInput: 'OP\PaginatedFileFilterInputTypeCreator'
+      queries:
+        readPaginatedFiles: 'OP\PaginatedFileQueryCreator'
