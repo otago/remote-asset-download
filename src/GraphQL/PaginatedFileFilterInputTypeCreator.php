@@ -70,9 +70,8 @@ class PaginatedFileFilterInputTypeCreator extends FileFilterInputTypeCreator
             $filters = explode(',', $filter['filenameExcludeStarts']);
             foreach ($filters as $filter) {
                 $list = $list->exclude([
-                    'Filename:StartsWith' => $filter
+                    'FileFilename:StartsWith' => $filter
                 ]);
-                Injector::inst()->get(LoggerInterface::class)->info(get_class() . $filter);
             }
         }
         if (!empty($filter['filename'])) {
