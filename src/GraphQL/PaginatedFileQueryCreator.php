@@ -12,6 +12,8 @@ use SilverStripe\Assets\File;
 use SilverStripe\GraphQL\Pagination\PaginatedQueryCreator;
 use SilverStripe\GraphQL\Pagination\Connection;
 use GraphQL\Type\Definition\ResolveInfo;
+use GraphQL\Type\Definition\UnionType;
+use SilverStripe\Assets\Folder;
 
 class PaginatedFileQueryCreator extends PaginatedQueryCreator
 {
@@ -42,7 +44,24 @@ class PaginatedFileQueryCreator extends PaginatedQueryCreator
                 ]
             ];
         })
-            ->setConnectionType($this->manager->getType('File'))
+        ->setConnectionType(function () {
+            return new UnionType([
+                'name' => 'PaginatedFilesResult',
+                'types' => [
+                    $this->manager->getType('File'),
+                    $this->manager->getType('Folder')
+                ],
+                'resolveType' => function ($object) {
+                    if ($object instanceof Folder) {
+                        return $this->manager->getType('Folder');
+                    }
+                    if ($object instanceof File) {
+                        return $this->manager->getType('File');
+                    }
+                    return null;
+                }
+            ]);
+        })
             ->setSortableFields(['ID', 'Title', 'Created', 'LastEdited'])
             ->setConnectionResolver(
                 function ($object, array $args, $context, ResolveInfo $info) {
