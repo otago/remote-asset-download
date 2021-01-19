@@ -72,6 +72,9 @@ class PaginatedFileFilterInputTypeCreator extends FileFilterInputTypeCreator
                 $list = $list->exclude([
                     'FileFilename:StartsWith' => $filter
                 ]);
+                $list = $list->exclude([
+                    'Filename:StartsWith' => $filter
+                ]);
             }
         }
         if (!empty($filter['filename'])) {
