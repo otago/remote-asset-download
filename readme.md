@@ -30,7 +30,9 @@ OP\RemoteAssetReadFilesController:
   target: https://website.where.filescomefrom
   user: myuserwithfilepermissions@website.org
   password: mysecretpassword
-  ignore: assets/studenthub/,assets/staffhub/
+  ignore: 
+    - assets/studenthub/
+    - assets/staffhub/
 ```
 
 The user must exist in SilverStripe, and have access to assets. you can restrict the user 
