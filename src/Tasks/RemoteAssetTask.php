@@ -79,7 +79,7 @@ class RemoteAssetTask extends BuildTask
                 'RemoteAssetDownloadFilesControllerURL' =>  $RemoteAssetDownloadFilesControllerURL,
                 'Target' => singleton(RemoteAssetReadFilesController::class)->config()->target,
                 'ToMachine' => Director::absoluteURL('/'),
-                'IgnoreList' => singleton(RemoteAssetReadFilesController::class)->config()->ignore
+                'IgnoreList' => implode(',', singleton(RemoteAssetReadFilesController::class)->config()->ignore)
             ]
         )->renderWith('RemoteAssetTask');
     }
